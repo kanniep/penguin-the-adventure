@@ -56,14 +56,14 @@ void loadTextures()
 Scener::Scener() {}
 
 // Function to draw a point.
-void Scener::draw(float distance)
+void Scener::draw(float distance, float numGroundBox)
 {
     glBindTexture(GL_TEXTURE_2D, texture[0]);
     glBegin(GL_POLYGON);
     glColor3f(1.0, 1.0, 1.0);
-    glTexCoord2f(0.0, distance); glVertex3f(-50.0, 0.0, 300.0);
-    glTexCoord2f(8.0, distance); glVertex3f(50.0, 0.0, 300.0);
-    glTexCoord2f(8.0, 48.0 + distance); glVertex3f(50.0, 0.0, -300.0);
-    glTexCoord2f(0.0, 48.0 + distance); glVertex3f(-50.0, 0.0, -300.0);
+    glTexCoord2f(0.0, distance); glVertex3f(-50.0, 0.0, 100.0);
+    glTexCoord2f(8.0, distance); glVertex3f(50.0, 0.0, 100.0);
+    glTexCoord2f(8.0, numGroundBox + distance); glVertex3f(50.0, 0.0, -300.0);
+    glTexCoord2f(0.0, numGroundBox + distance); glVertex3f(-50.0, 0.0, -300.0);
     glEnd();
 }

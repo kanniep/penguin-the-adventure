@@ -14,16 +14,19 @@
 #include "scene.h"
 #include "lighting.h"
 #include "Penquin.h"
+#include "Obstracles.h"
 
 // Global.
 static int isAnimate = 1;
 static int animationPeriod = (int) (1000.0f / 60.0f);
 static float animationRatio = 0.0;
-static float animateDiff = 0.05;
+static float animateDiff = (60.0f / 1000.0f) * 2.0;
+static float numGroundBox = 32.0;
 
 // Services.
 Scener sc;
 Penquin penquin;
+Obstracles obstracles = Obstracles(5);
 
 // Drawing routine.
 void drawScene()
@@ -33,7 +36,9 @@ void drawScene()
 
     gluLookAt(0.0, 20.0, 30.0, 0.0, 10.0, 0.0, 0.0, 1.0, 0.0);
 
-    sc.draw(animationRatio);
+    sc.draw(animationRatio, numGroundBox);
+
+    obstracles.draw();
 
     penquin.draw();
 
@@ -46,9 +51,13 @@ void animate(int value)
     if (!isAnimate) return;
 
     animationRatio += animateDiff;
-    if (animationRatio >= 1.0) animationRatio = 0.0;
+    if (animationRatio >= numGroundBox) animationRatio = 0.0;
 
-    penquin.updateJump(animateDiff);
+    penquin.updateJump();
+    obstracles.update(animationRatio, animateDiff, numGroundBox);
+    if (obstracles.isHit(penquin.xPos, penquin.yPos, penquin.r)) {
+        isAnimate = 0;
+    }
 
     glutPostRedisplay();
     glutTimerFunc(animationPeriod, animate, 1);

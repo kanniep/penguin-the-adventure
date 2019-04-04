@@ -7,7 +7,7 @@
 class Scener {
 public:
 Scener();
-void draw(float distance); // Function to draw a point.
+void draw(float distance, float numGroundBox); // Function to draw a point.
 private:
 };
 

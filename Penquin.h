@@ -11,13 +11,13 @@ public:
     Penquin();
     void draw();
     void jump();
-    void updateJump(float animateDiff);
+    void updateJump();
     void moveLeft();
     void moveRight();
+    float xPos = 0, yPos = 0, r=5.0;
 private:
     float gravity = -0.9;
     float yJumpVelocity = 25.0, yVelocity = 0.0;
-    float xPos = 0, yPos = 0;
 };
 
 

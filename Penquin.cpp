@@ -16,19 +16,19 @@ void Penquin::draw() {
     // Movement.
     glTranslatef(xPos, yPos, 0.0);
 
-    glTranslatef(0.0, 5.0, 0.0);
-    glutSolidSphere(5.0, 100, 100);
+    glTranslatef(0.0, r, 0.0);
+    glutSolidSphere(r, 100, 100);
     glPopMatrix();
     glPopAttrib();
 }
 
-void Penquin::updateJump(float animateDiff) {
+void Penquin::updateJump() {
     if (yVelocity != 0.0) {
         if (yPos < 0.0) {
             yPos = 0.0;
             yVelocity = 0.0;
         } else {
-            yPos += yVelocity*animateDiff;
+            yPos += yVelocity*0.06;
             yVelocity += gravity;
         }
     }
