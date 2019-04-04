@@ -1,0 +1,8 @@
+//
+// Created by kannie on 04/04/19.
+//
+
+#ifndef PENQUINTHEADVENTURE_LIGHTING_H
+#define PENQUINTHEADVENTURE_LIGHTING_H
+void lightingSetup();
+#endif //PENQUINTHEADVENTURE_LIGHTING_H

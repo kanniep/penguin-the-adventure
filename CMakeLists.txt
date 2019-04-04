@@ -6,7 +6,11 @@ set(PROJECT_NAME
 
 set(CMAKE_CXX_STANDARD 14)
 set(SOURCE_FILES
-        main.cpp controller.cpp controller.h)
+        main.cpp
+        getBMP.cpp getBMP.h
+        scene.cpp scene.h
+        lighting.cpp lighting.h
+        Penquin.cpp Penquin.h)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 

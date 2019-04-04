@@ -1,14 +1,7 @@
 ////////////////////////////////////////////////////////////////
-// flawlessUnicorn.cpp
+// main.cpp
 //
-// This program draws a unicorn that roams around a circular road.
-//
-// Interaction:
-// Press space to toggle between animation on and off.
-// Press the up/down arrow keys to speed up/slow down animation.
-// Press the x, X, y, Y, z, Z keys to rotate the scene.
-//
-// Kantapon Pornprasertsakul.
+// Kantapon Pornprasertsakul (2019).
 ////////////////////////////////////////////////////////////////
 
 #include <cmath>
@@ -17,9 +10,20 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
-// Globals.
-static int animationPeriod = 1000.0f / 30.0f; // Time interval between frames.
+#include "getBMP.h"
+#include "scene.h"
+#include "lighting.h"
+#include "Penquin.h"
 
+// Global.
+static int isAnimate = 1;
+static int animationPeriod = (int) (1000.0f / 60.0f);
+static float animationRatio = 0.0;
+static float animateDiff = 0.05;
+
+// Services.
+Scener sc;
+Penquin penquin;
 
 // Drawing routine.
 void drawScene()
@@ -27,60 +31,27 @@ void drawScene()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    gluLookAt(30.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+    gluLookAt(0.0, 20.0, 30.0, 0.0, 10.0, 0.0, 0.0, 1.0, 0.0);
 
-    // Auto calculate normal for standard object
-    glEnable(GL_AUTO_NORMAL); // Enable automatic normal calculation.
+    sc.draw(animationRatio);
+
+    penquin.draw();
+
     glutSwapBuffers();
 }
 
 // Timer function.
 void animate(int value)
 {
+    if (!isAnimate) return;
+
+    animationRatio += animateDiff;
+    if (animationRatio >= 1.0) animationRatio = 0.0;
+
+    penquin.updateJump(animateDiff);
+
     glutPostRedisplay();
     glutTimerFunc(animationPeriod, animate, 1);
-}
-
-void lightingSetup() {
-    // Turn on OpenGL lighting.
-    glEnable(GL_LIGHTING);
-
-    // Light property vectors.
-    float lightAmb[] = { 0.0, 0.0, 0.0, 1.0 };
-    float lightDifAndSpec0[] = { 0.4, 0.4, 0.4, 1.0 };
-    float lightDifAndSpec1[] = { 1.0, 1.0, 0.0, 1.0 };
-    float a = 0.1;
-    float globAmb[] = { a, a, a, 1.0 };
-    float lightPos0[] = { 0.0, 0.0, 1.0, 1.0 };
-
-    // Light0 properties.
-    glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDifAndSpec0);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, lightDifAndSpec0);
-    glLightfv(GL_LIGHT0, GL_POSITION, lightPos0);
-
-    // Light1 properties.
-    glLightfv(GL_LIGHT1, GL_AMBIENT, lightAmb);
-    glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDifAndSpec1);
-    glLightfv(GL_LIGHT1, GL_SPECULAR, lightDifAndSpec1);
-
-    glEnable(GL_LIGHT0); // Enable particular light source.
-    glEnable(GL_LIGHT1); // Enable particular light source.
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globAmb); // Global ambient light.
-    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE); // Enable local viewpoint
-
-    // Material property vectors.
-    float matSpec[] = { 1.0, 1.0, 1.0, 1.0 };
-    float matShine[] = { 50.0 };
-    float matDif[] = { 0.6, 0.6, 0.6, 1.0 };
-    // Material properties.
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matDif);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, matSpec);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, matShine);
-
-    // Enable color material mode.
-    glEnable(GL_COLOR_MATERIAL);
-    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 }
 
 // Initialization routine.
@@ -91,6 +62,16 @@ void setup()
 
     // Set lighting
     lightingSetup();
+
+    // Set background.
+    loadTextures();
+    sc = Scener();
+
+    // Set penquin.
+    penquin = Penquin();
+
+    // Start animation.
+    animate(1);
 }
 
 // OpenGL window reshape routine.
@@ -99,23 +80,37 @@ void resize(int w, int h)
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glFrustum(-7.5, 7.5, -5.0, 5.0, 5.0, 100.0);
+    glFrustum(-7.5, 7.5, -5.0, 5.0, 5.0, 300.0);
 
     glMatrixMode(GL_MODELVIEW);
 }
 
-//// Keyboard input processing routine.
-//void keyInput(unsigned char key, int x, int y)
-//{
-//}
-//
-//// Callback routine for non-ASCII key entry.
-//void specialKeyInput(int key, int x, int y)
-//{
-//    if (key == GLUT_KEY_DOWN) animationPeriod += 5;
-//    if (key == GLUT_KEY_UP) if (animationPeriod > 5) animationPeriod -= 5;
-//    glutPostRedisplay();
-//}
+// Keyboard input processing routine.
+void keyAction(unsigned char key, int x, int y)
+{
+    switch (key)
+    {
+        case 27:
+            exit(0);
+        case ' ':
+            if (isAnimate) isAnimate = 0;
+            else {
+                isAnimate = 1;
+                animate(1);
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+// Callback routine for non-ASCII key entry.
+void specialKeyAction(int key, int x, int y) {
+    if (key == GLUT_KEY_LEFT) penquin.moveLeft();
+    if (key == GLUT_KEY_RIGHT) penquin.moveRight();
+    if (key == GLUT_KEY_UP) penquin.jump();
+    glutPostRedisplay();
+}
 
 // Main routine.
 int main(int argc, char **argv)
@@ -130,8 +125,8 @@ int main(int argc, char **argv)
     glutCreateWindow("Penquin the Adventure");
     glutDisplayFunc(drawScene);
     glutReshapeFunc(resize);
-//    glutKeyboardFunc(keyInput);
-//    glutSpecialFunc(specialKeyInput);
+    glutKeyboardFunc(keyAction);
+    glutSpecialFunc(specialKeyAction);
 
     glewExperimental = GL_TRUE;
     glewInit();
