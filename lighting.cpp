@@ -46,6 +46,10 @@ void lightingSetup() {
     // Flat shading to obtain the checkered pattern of the floor.
     glShadeModel(GL_FLAT);
 
+
+    glEnable(GL_BLEND); // Enable blending.
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Specify blending parameters.
+
     // Auto calculate normal for standard object
     glEnable(GL_AUTO_NORMAL); // Enable automatic normal calculation.
 }

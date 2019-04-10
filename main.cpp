@@ -34,13 +34,16 @@ void drawScene()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
     gluLookAt(0.0, 20.0, 30.0, 0.0, 10.0, 0.0, 0.0, 1.0, 0.0);
 
     sc.draw(animationRatio, numGroundBox);
 
-    obstracles.draw();
-
     penquin.draw();
+
+    // Draw obstacles that might not be opaque.
+    obstracles.draw();
 
     glutSwapBuffers();
 }
