@@ -20,6 +20,8 @@ static float *vertices = NULL;  // Vertex array of the object x, y, z values.
 static int *faces = NULL; // Face (triangle) vertex indices.
 static float *normals = NULL;  // Vertex array of the object x, y, z values.
 static int numIndices; // Number of face vertex indices.
+static int rangeR = 10;
+static int baseR = 12;
 
 void loadOBJ(std::string fileName)
 {
@@ -151,8 +153,7 @@ Obstracle::Obstracle(float xPos, float zPos, float r) {
 }
 
 void Obstracle::draw() {
-
-
+    float currentAngle = (radious - baseR) / (float) rangeR * 360.0;
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY);
     glVertexPointer(3, GL_FLOAT, 0, vertices);
@@ -165,10 +166,14 @@ void Obstracle::draw() {
 
     glTranslatef(0.0, radious / 2.0, 0.0);
     glScalef(radious, radious, radious);
-
-    glColor4f(1.0, 1.0, 1.0, 0.8);
+    glRotatef(currentAngle, 0.0, 1.0, 0.0);
+    glScalef(0.3, 0.3, 0.3);
+    glTranslatef(0.0, 0.0, -17.0);
+    glColor4f(0.44, 0.48, 0.62, 0.9);
     glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, faces);
     glPopMatrix();
+
+    glEnable(GL_NORMALIZE);
 }
 
 void Obstracle::updatePos(float animateDiff, float numGroundBox) {
@@ -185,7 +190,7 @@ Obstracles::Obstracles(int numObs) {
     this->numObs = numObs;
 
     // Read the external OBJ file into the internal vertex and face vectors.
-    loadOBJ("/home/kannie/AIT/CG/Project/PenquinTheAdventure/images/icecube.obj");
+    loadOBJ("/home/kannie/AIT/CG/Project/PenquinTheAdventure/images/stone.obj");
     // Size the vertex array and copy into it x, y, z values from the vertex vector.
     vertices = new float[verticesVector.size()];
     for (int i = 0; i < verticesVector.size(); i++) vertices[i] = verticesVector[i];
@@ -211,7 +216,7 @@ void Obstracles::update(float animationRatio, float animateDiff, float numGround
         obstracles.pop_back();
     }
     if (isTime) {
-        int radious = rand() % 10 + 5;
+        int radious = rand() % rangeR + baseR;
         int xPos = rand() % (100 - 2 * radious) - (50 - radious);
         obstracles.push_front(Obstracle(xPos, -300.0, radious));
     }

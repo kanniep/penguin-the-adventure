@@ -1,34 +1,32 @@
 //
-// Created by kannie on 04/04/19.
+// Created by kannie on 11/04/19.
 //
 
+#include "Food.h"
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#include <stdlib.h>
-#include "Penquin.h"
-#include <iostream>
-
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
+#include <stdlib.h>
+#include <cmath>
 
-#define FRATE = 60;
+#include <iostream>
 
-std::vector<float> verticesVectorP; // Vector to read in vertex x, y and z values fromt the OBJ file.
-std::vector<float> normalsVectorP; // Vector to read in vertex x, y and z values fromt the OBJ file.
-std::vector<int> facesVectorP; // Vector to read in face vertex indices from the OBJ file.
+std::vector<float> verticesVector; // Vector to read in vertex x, y and z values fromt the OBJ file.
+std::vector<float> normalsVector; // Vector to read in vertex x, y and z values fromt the OBJ file.
+std::vector<int> facesVector; // Vector to read in face vertex indices from the OBJ file.
+float *vertices = NULL;  // Vertex array of the object x, y, z values.
+int *faces = NULL; // Face (triangle) vertex indices.
+float *normals = NULL;  // Vertex array of the object x, y, z values.
+int numIndices; // Number of face vertex indices.
+int rangeR = 10;
+int baseR = 12;
+float yPos = 30.0;
 
-float *verticesP[60];  // Vertex array of the object x, y, z values.
-int *facesP[60];// Face (triangle) vertex indices.
-float *normalsP[60];  // Vertex array of the object x, y, z values.
-int numIndicesP[60]; // Number of face vertex indices.
-
-void loadOBJPenquin(std::string fileName)
+void loadOBJF(std::string fileName)
 {
-    verticesVectorP.clear();
-    normalsVectorP.clear();
-    facesVectorP.clear();
     std::string line;
     int count, vertexIndex1, vertexIndex2, vertexIndex3;
     float coordinateValue;
@@ -50,7 +48,7 @@ void loadOBJPenquin(std::string fileName)
             for (count = 1; count <= 3; count++)
             {
                 currentString >> coordinateValue;
-                verticesVectorP.push_back(coordinateValue);
+                verticesVector.push_back(coordinateValue);
             }
         }
 
@@ -64,7 +62,7 @@ void loadOBJPenquin(std::string fileName)
             for (count = 1; count <= 3; count++)
             {
                 currentString >> coordinateValue;
-                normalsVectorP.push_back(coordinateValue);
+                normalsVector.push_back(coordinateValue);
             }
         }
 
@@ -114,9 +112,9 @@ void loadOBJPenquin(std::string fileName)
                         currentString >> vertexIndex3;
                         vertexIndex3--;
                         count++;
-                        facesVectorP.push_back(vertexIndex1);
-                        facesVectorP.push_back(vertexIndex2);
-                        facesVectorP.push_back(vertexIndex3);
+                        facesVector.push_back(vertexIndex1);
+                        facesVector.push_back(vertexIndex2);
+                        facesVector.push_back(vertexIndex3);
                     }
 
                         // From the fourth vertex and on output the next triangle of the fan.
@@ -125,9 +123,9 @@ void loadOBJPenquin(std::string fileName)
                         vertexIndex2 = vertexIndex3;
                         currentString >> vertexIndex3;
                         vertexIndex3--;
-                        facesVectorP.push_back(vertexIndex1);
-                        facesVectorP.push_back(vertexIndex2);
-                        facesVectorP.push_back(vertexIndex3);
+                        facesVector.push_back(vertexIndex1);
+                        facesVector.push_back(vertexIndex2);
+                        facesVector.push_back(vertexIndex3);
                     }
 
                     // Begin the process of detecting the next vertex index just after the vertex index just read.
@@ -149,99 +147,84 @@ void loadOBJPenquin(std::string fileName)
     inFile.close();
 }
 
-Penquin::Penquin() {
-    for (int numFrame=0; numFrame<60; numFrame++) {
-        // Read the external OBJ file into the internal vertex and face vectors.
 
-        if (numFrame < 10)
-            loadOBJPenquin("/home/kannie/AIT/CG/Project/PenquinTheAdventure/images/animated_penquin/penquin_00000" + std::to_string(numFrame + 1) + ".obj");
-        else
-            loadOBJPenquin("/home/kannie/AIT/CG/Project/PenquinTheAdventure/images/animated_penquin/penquin_0000" + std::to_string(numFrame + 1) + ".obj");
-        // Size the vertex array and copy into it x, y, z values from the vertex vector.
-
-        verticesP[numFrame] = new float[verticesVectorP.size()];
-        for (int i = 0; i < verticesVectorP.size(); i++) verticesP[numFrame][i] = verticesVectorP[i];
-        normalsP[numFrame] = new float[normalsVectorP.size()];
-        for (int i = 0; i < normalsVectorP.size(); i++) normalsP[numFrame][i] = normalsVectorP[i];
-        // Size the faces array and copy into it face index values from the face vector.
-        facesP[numFrame] = new int[facesVectorP.size()];
-        for (int i = 0; i < facesVectorP.size(); i++) facesP[numFrame][i] = facesVectorP[i];
-        numIndicesP[numFrame] = facesVectorP.size();
-    }
+Food::Food(float xPos, float zPos) {
+    this->xPos = xPos;
+    this->zPos = zPos;
 }
 
-void Penquin::draw() {
-    numFrame++;
-    if (numFrame == 60) numFrame = 0;
+void Food::draw() {
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, verticesP[numFrame]);
-    glNormalPointer(GL_FLOAT, 0, normalsP[numFrame]);
-    glPushAttrib(GL_CURRENT_BIT);
+    glVertexPointer(3, GL_FLOAT, 0, vertices);
+    glNormalPointer(GL_FLOAT, 0, normals);
+
     glPushMatrix();
 
-    // Calculate invisible
-    float invisBlended = 1.0;
-    if (invisible) {
-        currentInvis--;
-        invisBlended = 0.5;
-    }
-    if (currentInvis == 0) invisible = false;
-    switch(formNum) {
-        case 0: glColor4f(1.0, 1.0, 1.0, invisBlended); break;
-        case 1: glColor4f(0.0, 1.0, 0.0, invisBlended); break;
-        case 2: glColor4f(0.0, 0.0, 1.0, invisBlended); break;
-    }
-
     // Movement.
-    glTranslatef(xPos, yPos, 0.0);
+    glTranslatef(xPos, 0.0, zPos);
 
-    glTranslatef(0.0, r, 0.0);
-    glScalef(r, r, r);
-    glDrawElements(GL_TRIANGLES, numIndicesP[numFrame], GL_UNSIGNED_INT, facesP[numFrame]);
-//    glutSolidSphere(r, 100, 100);
+    glTranslatef(0.0, radious / 2.0 + yPos, 0.0);
+    glRotatef(zPos*2.0, 0.0, 1.0, 0.0);
+    glScalef(radious, radious, radious);
+    glColor4f(0.83, 0.69, 0.22, 1.0);
+    glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, faces);
     glPopMatrix();
-    glPopAttrib();
 
     glEnable(GL_NORMALIZE);
 }
 
-void Penquin::updateJump() {
-    if (yVelocity != 0.0) {
-        if (yPos < 0.0) {
-            yPos = 0.0;
-            yVelocity = 0.0;
-        } else {
-            yPos += yVelocity*0.06;
-            yVelocity += gravity;
-        }
+void Food::updatePos(float animateDiff, float numGroundBox) {
+    this->zPos = this->zPos + animateDiff * numGroundBox / 3.0;
+}
+
+bool Food::isHit(float pPosX, float pPosY, float r) {
+    double distance = hypot(hypot(pPosX-this->xPos,pPosY-yPos),0.0-this->zPos);
+    float closeRange = r + this->radious;
+    bool result = distance < closeRange;
+    return result;
+}
+
+Foods::Foods(int numObs) {
+    this->numObs = numObs;
+
+    // Read the external OBJ file into the internal vertex and face vectors.
+    loadOBJF("/home/kannie/AIT/CG/Project/PenquinTheAdventure/images/seahorse.obj");
+    // Size the vertex array and copy into it x, y, z values from the vertex vector.
+    vertices = new float[verticesVector.size()];
+    for (int i = 0; i < verticesVector.size(); i++) vertices[i] = verticesVector[i];
+    normals = new float[normalsVector.size()];
+    for (int i = 0; i < normalsVector.size(); i++) normals[i] = normalsVector[i];
+    // Size the faces array and copy into it face index values from the face vector.
+    faces = new int[facesVector.size()];
+    for (int i = 0; i < facesVector.size(); i++) faces[i] = facesVector[i];
+    numIndices = facesVector.size();
+}
+
+void Foods::draw() {
+    for (auto obstracle : foods) { obstracle.draw(); }
+}
+
+void Foods::update(float animationRatio, float animateDiff, float numGroundBox) {
+    float ratioAdd = numGroundBox / numObs;
+    bool isTime = fmodf(animationRatio, ratioAdd) <= 0.1;
+    for (auto& obstracle : foods) {
+        obstracle.updatePos(animateDiff, numGroundBox);
+    }
+    if (foods.size() >= numObs && isTime) {
+        foods.pop_back();
+    }
+    if (isTime) {
+        int xPos = rand() % (100 - 2) - (50);
+        foods.push_front(Food(xPos, -300.0));
     }
 }
 
-void Penquin::jump() {
-    if (yPos == 0.0) yVelocity = yJumpVelocity;
-}
-
-void Penquin::moveLeft() {
-    if (xPos > -50.0+r) xPos -= 1;
-}
-
-void Penquin::moveRight() {
-    if (xPos < 50.0-r) xPos += 1;
-}
-
-void Penquin::upForm() {
-    if (formNum != maxFormNum) formNum++;
-}
-
-bool Penquin::downForm() {
-    if (!invisible) {
-        if (formNum == 0) return false;
-        else {
-            formNum--;
-            invisible = true;
-            currentInvis = maxInvis;
-            return true;
-        }
-    } else return true;
+bool Foods::isHit(float pPosX, float pPosY, float r) {
+    if (foods.size() == 0) return false;
+    else {
+        bool result = foods.back().isHit(pPosX, pPosY, r);
+        if (result) foods.pop_back();
+        return result;
+    }
 }

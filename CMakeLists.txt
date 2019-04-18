@@ -10,7 +10,7 @@ set(SOURCE_FILES
         getBMP.cpp getBMP.h
         scene.cpp scene.h
         lighting.cpp lighting.h
-        Penquin.cpp Penquin.h Obstracles.cpp Obstracles.h)
+        Penquin.cpp Penquin.h Obstracles.cpp Obstracles.h Food.cpp Food.h)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 

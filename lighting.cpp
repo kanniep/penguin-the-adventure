@@ -13,7 +13,7 @@ void lightingSetup() {
     glEnable(GL_LIGHTING);
 
     // Light property vectors.
-    float lightAmb[] = { 0.0, 0.0, 0.0, 1.0 };
+    float lightAmb[] = { 0.0, 0.0, 0.0, 0.0 };
     float lightDifAndSpec0[] = { 1.0, 1.0, 1.0, 1.0 };
     float globAmb[] = { 0.2, 0.2, 0.2, 1.0 };
     float lightPos0[] = { 0.0, 1.5, 3.0, 0.0 };
@@ -32,8 +32,9 @@ void lightingSetup() {
 
     // Material property vectors.
     float matAmbAndDif[] = { 1.0, 1.0, 1.0, 1.0 };
-    float matSpec[] = { 1.0, 1.0, 1.0, 1.0 };
+    float matSpec[] = { 1.0, 1.0, 1.0, 0.8 };
     float matShine[] = { 50.0 };
+
     // Material properties.
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, matSpec);
@@ -45,7 +46,6 @@ void lightingSetup() {
 
     // Flat shading to obtain the checkered pattern of the floor.
     glShadeModel(GL_FLAT);
-
 
     glEnable(GL_BLEND); // Enable blending.
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Specify blending parameters.
