@@ -188,9 +188,9 @@ void Penquin::draw() {
     }
     if (currentInvis == 0) invisible = false;
     switch(formNum) {
-        case 0: glColor4f(1.0, 1.0, 1.0, invisBlended); break;
-        case 1: glColor4f(0.0, 1.0, 0.0, invisBlended); break;
-        case 2: glColor4f(0.0, 0.0, 1.0, invisBlended); break;
+        case 0: this->r = 5; break;
+        case 1: this->r = 6; break;
+        case 2: this->r = 7; break;
     }
 
     // Movement.
